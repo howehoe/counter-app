@@ -6,17 +6,29 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
+    "test": "turbo run test",
+    "coverage": "turbo run coverage",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier -w .",
     "db:generate": "pnpm --filter @counter-app/database generate",
     "db:migrate": "pnpm --filter @counter-app/database migrate:dev",
     "db:push": "pnpm --filter @counter-app/database push",
     "db:studio": "pnpm --filter @counter-app/database studio"
   },
   "devDependencies": {
-    "turbo": "^2.3.0"
+    "@eslint/js": "^9.39.1",
+    "@typescript-eslint/eslint-plugin": "^8.48.1",
+    "@typescript-eslint/parser": "^8.48.1",
+    "@vitest/coverage-v8": "^4.0.15",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.7.4",
+    "turbo": "^2.3.0",
+    "typescript-eslint": "^8.48.1",
+    "vitest": "^4.0.15"
   },
   "packageManager": "pnpm@9.14.2",
   "engines": {
     "node": ">=18"
   }
 }
-

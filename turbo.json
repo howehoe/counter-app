@@ -11,6 +11,15 @@
     },
     "lint": {
       "dependsOn": ["^build"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "test": {
+      "dependsOn": ["^test"]
+    },
+    "coverage": {
+      "dependsOn": ["^coverage"]
     }
   }
 }

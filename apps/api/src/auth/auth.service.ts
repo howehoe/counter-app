@@ -5,21 +5,19 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { PrismaService } from '../prisma/prisma.service';
+import { AuthRepository } from './auth.repository';
 import { SignupDto, LoginDto, AuthResponse } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
+    private authRepository: AuthRepository,
     private jwtService: JwtService,
   ) {}
 
   async signup(dto: SignupDto): Promise<AuthResponse> {
     // Check if username already exists
-    const existingUser = await this.prisma.user.findUnique({
-      where: { username: dto.username },
-    });
+    const existingUser = await this.authRepository.findUserByUsername(dto.username);
 
     if (existingUser) {
       throw new ConflictException('Username already exists');
@@ -29,12 +27,7 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
     // Create user
-    const user = await this.prisma.user.create({
-      data: {
-        username: dto.username,
-        passwordHash,
-      },
-    });
+    const user = await this.authRepository.createUser(dto.username, passwordHash);
 
     // Generate JWT
     const accessToken = this.jwtService.sign({
@@ -53,9 +46,7 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponse> {
     // Find user
-    const user = await this.prisma.user.findUnique({
-      where: { username: dto.username },
-    });
+    const user = await this.authRepository.findUserByUsername(dto.username);
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -84,10 +75,6 @@ export class AuthService {
   }
 
   async validateUser(userId: string) {
-    return this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, username: true },
-    });
+    return this.authRepository.findUserById(userId);
   }
 }
-

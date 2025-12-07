@@ -1,22 +1,17 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { CountersRepository } from './counters.repository';
 import { CreateCounterDto, UpdateCounterDto } from './dto/counter.dto';
 
 @Injectable()
 export class CountersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private countersRepository: CountersRepository) {}
 
   async findAll(userId: string) {
-    return this.prisma.counter.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.countersRepository.findAllByUserId(userId);
   }
 
   async findOne(id: string, userId: string) {
-    const counter = await this.prisma.counter.findUnique({
-      where: { id },
-    });
+    const counter = await this.countersRepository.findById(id);
 
     if (!counter) {
       throw new NotFoundException('Counter not found');
@@ -30,41 +25,25 @@ export class CountersService {
   }
 
   async create(dto: CreateCounterDto, userId: string) {
-    return this.prisma.counter.create({
-      data: {
-        name: dto.name,
-        count: 0,
-        userId,
-      },
-    });
+    return this.countersRepository.create(dto.name, userId);
   }
 
   async update(id: string, dto: UpdateCounterDto, userId: string) {
     const counter = await this.findOne(id, userId);
-
-    return this.prisma.counter.update({
-      where: { id: counter.id },
-      data: { name: dto.name },
-    });
+    if (dto.name !== undefined) {
+      return this.countersRepository.updateName(counter.id, dto.name);
+    }
+    return counter;
   }
 
   async increment(id: string, userId: string) {
     const counter = await this.findOne(id, userId);
-
-    return this.prisma.counter.update({
-      where: { id: counter.id },
-      data: { count: { increment: 1 } },
-    });
+    return this.countersRepository.incrementCount(counter.id);
   }
 
   async delete(id: string, userId: string) {
     const counter = await this.findOne(id, userId);
-
-    await this.prisma.counter.delete({
-      where: { id: counter.id },
-    });
-
+    await this.countersRepository.delete(counter.id);
     return { message: 'Counter deleted successfully' };
   }
 }
-
